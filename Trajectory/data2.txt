@@ -1,0 +1,29 @@
+Couch Rtn
+MLCModel
+NumberOfAxes
+axesIndex
+Gantry Rtn
+Version
+AxisScale
+Couch Rol
+MU
+Couch Lat
+Couch Pit
+X1
+Coll Rtn
+MLC
+Couch Lng
+X2
+Signature
+SamplingInterval
+Beam Hold
+NumberOfSubbeams
+axesOrder
+Couch Vrt
+Truncated
+NumberOfSnapShots
+Control Point
+Y1
+Y2
+SamplePerAxis
+HeaderSize

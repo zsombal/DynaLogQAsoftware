@@ -1,0 +1,54 @@
+Patient ID:	QA_TB_MORNING
+Plan Name:	2.Morning QA
+Plan UID:	1.2.246.352.71.5.228044388791.441415.20141007193712
+Beam Number :	16
+Beam Name :	4.T3MLCSpeed
+Original MU :	120
+
+Logging Scale :	IEC
+X1 (Cms):	6.00
+X2 (Cms):	6.00
+Y1 (Cms):	10.00
+Y2 (Cms):	10.00
+Gantry Rotation Angle (deg):	142.09
+Energy :	6x
+MU1 :	54.90
+MU2 :	55.06
+Radiation Time (mins):	0.096
+DoseRate (MU/min):	598.29
+PFN High Voltage Power Supply Current (A):	1.902481
+PFN Actual Voltage (KV):	18.55232
+RF Driver Voltage (V):	4.484
+RF Forward Power (W):	1.445618
+AFC Error (V):	-0.000106247
+Gun Current (A):	0.3858948
+Gun High Voltage (V):	-14956
+Gun Grid Voltage (V):	117.5771
+Gun Filament Step Voltage (V):	5.300003
+Gun Filament Voltage (V):	5.268555
+Bend Magnet Current (A):	16.20789
+Bend Magnet Voltage (V):	2.288818
+Accelerator Solenoid Current (A):	34.99603
+Klystron Solenoid Current (A):	34.88159
+Radial Symmetry (%):	0.00073882
+Transverse Symmetry (%):	-0.00113927
+Target Current (nC):	305.3477
+Buncher Radial Current (A):	-0.0050354
+Buncher Transverse Current (A):	-0.01504517
+Angle Radial Current (A):	0.03088379
+Angle Transverse Current (A):	0.08309937
+Position Radial Current (A):	-0.757309
+Position Transverse Current (A):	-0.2232056
+Trim : (A)	0.01805115
+Accelerator Vacion Current (uA):	0
+Positive 5V dc:	4.988828
+Positive 24V dc:	24.05681
+Analog Negative 5V dc:	5.042726
+Analog Positive 5V dc:	4.949121
+Negative 12V dc:	12.18707
+Positive 3V dc:	3.268497
+Node Power Supply Voltage (V):	24.22889
+Water Level :	Normal
+City Water Temperature (deg C):	14.53945
+Internal Water Supply Temperature (deg C):	39.96834
+Gas Pressure (PSI):	30.59266
