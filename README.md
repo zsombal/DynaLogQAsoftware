@@ -11,7 +11,7 @@ If you want to work with a single file open 'SingleFileQA.m' in MATLAB and simpl
 If you want to work with multiple (DynaLog) files, open the 'MultipleFilesQA.m' in MATLAB and simply run it
 - after clicking on Create Bundle from single file >> wait till it says 'Bundle loaded' in the command line
 - here, the load bundle can be really useful, especially considering the fact that you can work with a lot of files,
-and also can do calculations on them
+and can also do calculations on them
 
 
 
