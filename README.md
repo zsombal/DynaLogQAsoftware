@@ -23,4 +23,4 @@ which is NOT implemented in this software due to time constraints (results shoul
 
 
 
-
+Developed in an independent class project for Phys 339 (McGill University)
