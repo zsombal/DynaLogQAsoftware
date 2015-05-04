@@ -22,6 +22,7 @@ Note
 Known issues:
 - Pylinac (?) is a good software that does the same, I'd say. It also has the feature of get_moving_leaves() which is NOT implemented in this software due to time constraints (results should be about the same) 
 - MultipleFilesQA.m sorts the files based on a modification date basis
+- If the Trajectory file has a '*.bin.cpgz' file, the code (possibly the TrajectoryLog.py) does not work
 
 In the 'Test' folder, you can find DynaLog files to work with.
 
