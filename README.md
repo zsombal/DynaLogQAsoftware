@@ -26,8 +26,9 @@ Known issues:
 
 In the 'Test' folder, you can find DynaLog files to work with.
 
-Developed in an independent class project for Phys 339 (McGill University).
+Developed in an independent class group project for Phys 339 (McGill University).
 
 Zsombor Balassy
+
 zsombor.balassy@mail.mcgill.ca
 
