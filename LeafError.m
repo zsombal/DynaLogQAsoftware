@@ -1,6 +1,6 @@
-function [curr_pos leaf_error, leaf_RMS_error, bank_RMS_error, th_percentile, ...
+function [curr_pos, leaf_error, leaf_RMS_error, bank_RMS_error, th_percentile, ...
     bank_th_percentile, mean_leaf_error, variance] = ...
-    LeafError(Matrix, zeroincluded, bankA)
+    LeafError(Matrix, zeroincluded, bankA, filterindex)
 % [leaf_error leaf_RMS_error bank_RMS_error th_percentile] = LeafError(Matrix, zeroincluded, bankA)
 % 
 % onlyzeroincluded = 1 - only the nonzero values are included in the
@@ -40,12 +40,25 @@ function [curr_pos leaf_error, leaf_RMS_error, bank_RMS_error, th_percentile, ..
 % planned position for Bank A. For Bank B it should be the other
 % way around.
 
-Matrix_tmp = Matrix(:, 15:end);
 
-curr_pos = Matrix_tmp(:,2:4:end)./100; % convert to mm
-planned_pos = Matrix_tmp(:,1:4:end)./100;
+switch filterindex
+    
+    case 1
 
-leaf_error = curr_pos - planned_pos;
+        Matrix_tmp = Matrix(:, 15:end);
+
+
+        curr_pos = Matrix_tmp(:,2:4:end)./100; % convert to mm
+        planned_pos = Matrix_tmp(:,1:4:end)./100;
+
+        leaf_error = curr_pos - planned_pos;
+
+    case 2
+   
+        leaf_error = Matrix;
+        
+        curr_pos = 0;
+end
 %%
 
 if zeroincluded == 0

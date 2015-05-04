@@ -4,8 +4,10 @@
 #!/bin/python
 import TrajectoryLog
 
-"""  Modify this line to change the Trajectory file to be read """
-aa = TrajectoryLog.main('QA_TB_MORNING_2.Morning QA_4.T3MLCSpeed_20150320072625.bin')
+"""  This line should NOT be changed!! MATLAB reads from this and modifies it """
+aa = TrajectoryLog.main('/Users/zsombor/Documents/McGill/Phys339/medPhys/DynaLogQAsoftware/Trajectory/QA_TB_MORNING_2.Morning QA_4.T3MLCSpeed_20150320072625.bin')
+
+
 
 header = aa[1]
 
@@ -71,6 +73,3 @@ for i in trajheader:
 
 
 f.close()
-
-
-

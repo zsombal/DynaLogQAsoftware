@@ -130,13 +130,15 @@ switch filterindex
         fprintf('bin\n')
         
         FILENAME = FILENAME_tmp;
-        file_names_path = fullfile(DIRECTORYNAME, FILENAME);
+        file_names_path = fullfile(DIRECTORYNAME, FILENAME)
         
+        num_files = 1;
         
         %%%%%%% !!!!!!!! implement a code, where you can run the python
-        %%%%%%% code on the 'file_names_path'
+        %%%%%%% code on the 'file_names_path', 
+        %%%%%%% DONE, though in a very basic way, but done
         
-       run MatPy.m
+       [actual, expected] = MatPy(file_names_path);
        
        curr_pos{1} = expected(:, 18:77).*10;
        curr_pos{2} = expected(:, 78:137).*10;
@@ -145,6 +147,19 @@ switch filterindex
        planned_pos{2} = actual(:, 78:137).*10;
 
        
+       All_files = cell(1,num_files); % create an array, each element corresponds to one Dynalog raw file
+       All_header = cell(1,num_files); % create an array, each element corresponds to one Dynalog raw file
+
+        
+        % here we load all the files
+
+       for jj = 1: num_files*2
+
+          All_files{jj} = curr_pos{jj} - planned_pos{jj}; %more like leaf error
+%           All_header{jj} = import_header(file_names_path{jj});
+%           All_header{jj}{7} = FILENAME{jj}(1);      % determine if it's Bank A or B
+
+       end
 
         
 end
@@ -165,10 +180,8 @@ mean_leaf_error  = cell(1, num_files);
 
 switch filterindex
     
-    
-    case 1 %.dlg
-        
-                %if we've chosen a Step-and-Shoot file, this should be checked (not by user)
+    case 1 
+        %if we've chosen a Step-and-Shoot file, this should be checked (not by user)
         % zeroincluded = 0; if step-and-shoot is choosen
 
         if All_header{1}{2}(1:4)=='STEP'
@@ -177,63 +190,86 @@ switch filterindex
         else
             zeroincluded = 1; % Dynamic movement
         end
-
-
+        
+        %set up variables that already exist in case 2
+        curr_pos = cell(1, num_files);
+        
         for ll = 1:num_files
 
- 
+
             [curr_pos{ll}, leaf_error{ll}, leaf_RMS_error{ll}, bank_RMS_error{ll}, th_percentile{ll}, ...
-                bank_th_percentile{ll}, mean_leaf_error{ll}, variance] = ...
-                LeafError(All_files{ll}, zeroincluded, All_header{ll}{7}); % Results are in cm
+                bank_th_percentile{ll}, mean_leaf_error{ll}, variance{ll}] = ...
+                LeafError(All_files{ll}, zeroincluded, All_header{ll}{7}, filterindex); % Results are in mm
 
         %     [leaf_speeds{ll}, mean_leaf_speeds{ll}, max_leaf_speeds{ll}] = ...
         %         DynoCompute(All_files{ll}, All_header{ll}{7}); % in mm/100
         %     [avg_gantry_speed{ll} gantry_angle{ll}] = GantryCompute(All_files{ll}); % in mm * sec^-1, in deg/10
 
-%             [beam_on_time{ll}] = BeamOn(All_files{ll}); % in sec
+        %             [beam_on_time{ll}] = BeamOn(All_files{ll}); % in sec
         end
         
+    case 2
+       %% 
+        zeroincluded = 1;
         
-        
-    case 2 %.bin
-       
-       for ll = 1:num_files
+        for ll = 1:num_files
 
-            leaf_error{ll} = curr_pos{ll} - planned_pos{ll};
+            
 
+            [AlreadyHave, leaf_error{ll}, leaf_RMS_error{ll}, bank_RMS_error{ll}, th_percentile{ll}, ...
+                bank_th_percentile{ll}, mean_leaf_error{ll}, variance{ll}] = ...
+                LeafError(All_files{ll}, zeroincluded, 'A' , filterindex); % Results are in mm
 
-            if ll == 1
-                leaf_error{ll} = -leaf_error{ll};
-            %     fprintf('B\n')
-            else
-            %     fprintf('A\n')
-            end
+        %     [leaf_speeds{ll}, mean_leaf_speeds{ll}, max_leaf_speeds{ll}] = ...
+        %         DynoCompute(All_files{ll}, All_header{ll}{7}); % in mm/100
+        %     [avg_gantry_speed{ll} gantry_angle{ll}] = GantryCompute(All_files{ll}); % in mm * sec^-1, in deg/10
 
-
-            leaf_RMS_error{ll} = rms(leaf_error{ll}); % in mm
-
-
-            mean_leaf_error{ll} = mean(leaf_error{ll}); % in mm
-
-            variance{ll} = var(leaf_error{ll});
-
-
-            for kk = 1:60 % 60 MLC leaves         
-
-
-                th_percentile{ll}(1,kk) = prctile(abs(leaf_error{ll}(:,kk)),95); % in mm
-
-            end
-
-            bank_th_percentile{ll} = prctile(abs(leaf_error{ll}(:)),95); % in mm
-
-            bank_RMS_error{ll} = mean(leaf_RMS_error{ll}); % in mm
-
-       end
-
-        
-        
+        %             [beam_on_time{ll}] = BeamOn(All_files{ll}); % in sec
+        end
+%%        
 end
+
+
+
+        
+       
+%        for ll = 1:num_files
+% 
+%             leaf_error{ll} = curr_pos{ll} - planned_pos{ll};
+% 
+% 
+%             if ll == 1
+%                 leaf_error{ll} = -leaf_error{ll};
+%             %     fprintf('B\n')
+%             else
+%             %     fprintf('A\n')
+%             end
+% 
+% 
+%             leaf_RMS_error{ll} = rms(leaf_error{ll}); % in mm
+% 
+% 
+%             mean_leaf_error{ll} = mean(leaf_error{ll}); % in mm
+% 
+%             variance{ll} = var(leaf_error{ll});
+% 
+% 
+%             for kk = 1:60 % 60 MLC leaves         
+% 
+% 
+%                 th_percentile{ll}(1,kk) = prctile(abs(leaf_error{ll}(:,kk)),95); % in mm
+% 
+%             end
+% 
+%             bank_th_percentile{ll} = prctile(abs(leaf_error{ll}(:)),95); % in mm
+% 
+%             bank_RMS_error{ll} = mean(leaf_RMS_error{ll}); % in mm
+% 
+%        end
+% 
+%         
+%         
+% end
 
 
 % put the useful data into the workspace
@@ -291,8 +327,10 @@ handles2.pp = handles.pp;
 % handles.output = output_tmp
 
 clear handles
-handles = handles2
+handles = handles2;
 hObject = hObject2;
+
+setappdata(0,'mapData',handles);
 
 fprintf('Bundle loaded\n')
 
@@ -338,7 +376,7 @@ function threshold_button_Callback(hObject, eventdata, handles)
 % handles    structure with handles and user data (see GUIDATA)
 
 threshold = ...
-    str2double(get(handles.threshold_input,'String'));
+    (str2double(get(handles.threshold_input,'String'))) * 10;
 
 ii = find(handles.leaf_RMS_error{2*handles.pp+1}>=threshold);
 
@@ -436,7 +474,7 @@ function error_hist_button_Callback(hObject, eventdata, handles)
 figure
 xx = abs(nonzeros(handles.leaf_error{2*handles.pp+1}));
 edges = [0:0.5:10]+0.25;
-h = hist(xx,edges-0.25);
+h = hist(xx,edges);
 bar(edges,h,'hist')
 title('Error Histogram Plot')
 xlabel('Leaf Error (mm)')
@@ -480,7 +518,7 @@ cnames = {'Bin no'; '# of counts'; 'Percent'; 'Percent Sum'};
 
 
 % rnames are in cm
-rnames = {'0 - < 0.050',...
+rnames = {'0 - < 0.050 (cm)',...
     '0.050 - < 0.10',...
     '0.10 - < 0.150',...
     '0.150 - < 0.20',...
@@ -503,12 +541,13 @@ rnames = {'0 - < 0.050',...
     '1.00 and above'};
 
 % f = figure('Position',[440 500 1000 1000]);
-f = figure
+f = figure;
 
 % Create the uitable
 t = uitable(f,'Data',d,...
             'ColumnName',cnames,...
             'RowName',rnames);
+
 
 
 

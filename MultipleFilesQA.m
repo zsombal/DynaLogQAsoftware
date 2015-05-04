@@ -92,12 +92,17 @@ FILE_LISTING=FILE_LISTING(sx);
 
 [NumFilesinFolder NotUsed] = size(FILE_LISTING);
 
-
+%*.dlg files sorting
 ii = 1;
+filterindex = 1;
+file_names = {};
+
+
 
 % get those file_names in that folder that have a .dlg extension
 for hh = 1:NumFilesinFolder
    
+    
     if length(FILE_LISTING(hh).name) >= 4
         
         
@@ -114,93 +119,213 @@ for hh = 1:NumFilesinFolder
     
 end
 
+if isempty(file_names)
+
+    %*.bin files sorting
+    ii = 1;
+
+    filterindex = 2;
+    
+    % get those file_names in that folder that have a .dlg extension
+    for hh = 1:NumFilesinFolder
+
+        if length(FILE_LISTING(hh).name) >= 4
+
+
+            if FILE_LISTING(hh).name(end-3:end) == '.bin'
+    %             fprintf('working \n')
+                file_names{ii} = FILE_LISTING(hh).name;
+
+                file_names_path{ii} = fullfile(DIRECTORYNAME, file_names{ii});
+
+                ii = ii+1;
+
+            end
+        end
+
+    end
+
+elseif isempty(file_names)
+    
+    fprintf('Please choose a folder that contains either .bin or .dlg extension only')
+    
+end
 
 % determine how many files do we have
 num_files = length(file_names_path);
 
-All_files = cell(1,num_files); % create an array, each element corresponds to one Dynalog raw file
-All_header = cell(1,num_files); % create an array, each element corresponds to one Dynalog raw file
 
-% here we load all the files
-
-for jj = 1: num_files
+switch filterindex
     
-   All_files{jj} = import_file(file_names_path{jj});
-   All_header{jj} = import_header(file_names_path{jj});
-   All_header{jj}{7} = file_names{jj}(1); % determine if it's Bank A or B
+    case 1
+
+    All_files = cell(1,num_files); % create an array, each element corresponds to one Dynalog raw file
+    All_header = cell(1,num_files); % create an array, each element corresponds to one Dynalog raw file
+
+    % here we load all the files
+
+    for jj = 1: num_files
+
+       All_files{jj} = import_file(file_names_path{jj});
+       All_header{jj} = import_header(file_names_path{jj});
+       All_header{jj}{7} = file_names{jj}(1); % determine if it's Bank A or B
+    end
+
+    if All_header{1}{2}(1:4)=='STEP'
+
+        zeroincluded = 0; % for step-and-shoot
+    else
+        zeroincluded = 1; % Dynamic movement
+    end
+
+    % work on the loaded files, do all the calculations
+
+    curr_pos = cell(1, num_files);
+    leaf_error = cell(1, num_files); % planned - actual position
+    leaf_RMS_error = cell(1, num_files); % leaf RMS error
+    bank_RMS_error = cell(1, num_files); % mean/bank RMS error for a given bank
+    th_percentile  = cell(1, num_files);
+    bank_th_percentile  = cell(1, num_files);
+    mean_leaf_error  = cell(1, num_files);
+    variance = cell(1, num_files);
+
+    for ll = 1:num_files
+
+    %     [num_rows notUsed] = size(All_files{ll});
+
+        [curr_pos{ll}, leaf_error{ll}, leaf_RMS_error{ll}, bank_RMS_error{ll}, th_percentile{ll}, ...
+            bank_th_percentile{ll}, mean_leaf_error{ll}, variance{ll}] = ...
+            LeafError(All_files{ll}, zeroincluded, All_header{ll}{7}, filterindex); % Results are in cm
+
+    %     [leaf_speeds{ll}, mean_leaf_speeds{ll}, max_leaf_speeds{ll}] = ...
+    %         DynoCompute(All_files{ll}, All_header{ll}{7}); % in mm/100
+    %     [avg_gantry_speed{ll} gantry_angle{ll}] = GantryCompute(All_files{ll}); % in mm * sec^-1, in deg/10
+
+    %     [beam_on_time{ll}] = BeamOn(All_files{ll}); % in sec
+
+    end
+    
+    
+    case 2
+    
+
+        fprintf('bin\n')
+        
+        actual = cell(1, num_files);
+        expected = cell(1, num_files);
+        curr_pos = cell(1, num_files*2);
+        planned_pos = cell(1, num_files*2);
+        
+        
+        for jj = 1: num_files
+
+%             FILENAME = FILENAME_tmp;
+%             file_names_path = fullfile(DIRECTORYNAME, FILENAME)
+
+
+            %%%%%%% !!!!!!!! implement a code, where you can run the python
+            %%%%%%% code on the 'file_names_path', 
+            %%%%%%% DONE, though in a very basic way, but done
+
+           file_names_path{jj};
+           [actual{jj}, expected{jj}] = MatPy(file_names_path{jj});
+
+%            fprintf('python code ran\n')
+           curr_pos{2*jj-1} = expected{jj}(:, 18:77).*10;
+           curr_pos{2*jj} = expected{jj}(:, 78:137).*10;
+
+           planned_pos{2*jj-1} = actual{jj}(:, 18:77).*10;
+           planned_pos{2*jj} = actual{jj}(:, 78:137).*10;
+           
+           fprintf('File %d done out of %d\n',jj,num_files)
+
+        end
+        
 end
 
-% zeroincluded = 0; if step-and-shoot is choosen
-
-if All_header{1}{2}(1:4)=='STEP'
-
-    zeroincluded = 0; % for step-and-shoot
-else
-    zeroincluded = 1; % Dynamic movement
-end
-
-% work on the loaded files, do all the calculations
-
-
-curr_pos = cell(1, num_files);
-leaf_error = cell(1, num_files); % planned - actual position
-leaf_RMS_error = cell(1, num_files); % leaf RMS error
-bank_RMS_error = cell(1, num_files); % mean/bank RMS error for a given bank
-th_percentile  = cell(1, num_files);
-bank_th_percentile  = cell(1, num_files);
-mean_leaf_error  = cell(1, num_files);
-variance = cell(1, num_files);
-
-% avg_gantry_speed = cell(1, num_files);
-% gantry_angle = cell(1, num_files);
-
-% leaf_speeds = cell(1, num_files);
-% mean_leaf_speeds = cell(1, num_files);
-% max_leaf_speeds = cell(1, num_files);
-
-% beam_on_time = cell(1, num_files);
-
-% zeroincluded = 0;
-
-for ll = 1:num_files
-    
-%     [num_rows notUsed] = size(All_files{ll});
-    
-    [curr_pos{ll}, leaf_error{ll}, leaf_RMS_error{ll}, bank_RMS_error{ll}, th_percentile{ll}, ...
-        bank_th_percentile{ll}, mean_leaf_error{ll}, variance{ll}] = ...
-        LeafError(All_files{ll}, zeroincluded, All_header{ll}{7}); % Results are in cm
-   
-%     [leaf_speeds{ll}, mean_leaf_speeds{ll}, max_leaf_speeds{ll}] = ...
-%         DynoCompute(All_files{ll}, All_header{ll}{7}); % in mm/100
-%     [avg_gantry_speed{ll} gantry_angle{ll}] = GantryCompute(All_files{ll}); % in mm * sec^-1, in deg/10
-    
-%     [beam_on_time{ll}] = BeamOn(All_files{ll}); % in sec
- 
-end
 
 % calculation of Trends of Errors and Statistical Analysis
 % Here we orgainze the RMS_error and variance in an ordered list, so that
 % each leaf corresponds to a column
 
-RMS_error_list = zeros(num_files/2, 120);
+switch filterindex
+    
+    case 1%*.dlg files
+        % Note num_files = # of Runs * 2 = # of DynaLog files
 
-variance_list = zeros(num_files/2, 120);
+        RMS_error_list = zeros(num_files/2, 120);
 
-for jj = 1:2:num_files
-    
-%     RMS_error((jj+1)/2) = (bank_RMS_error{jj}+bank_RMS_error{jj+1}) / 2
-    
-    RMS_error_list((jj+1)/2,1:60) = leaf_RMS_error{jj};
-    RMS_error_list((jj+1)/2,61:120) = leaf_RMS_error{jj+1};
-    
-    variance_list((jj+1)/2,1:60) = variance{jj};
-    variance_list((jj+1)/2,61:120) = variance{jj+1};
-    
-end    
+        variance_list = zeros(num_files/2, 120);
+
+        for jj = 1:2:num_files
+
+        %     RMS_error((jj+1)/2) = (bank_RMS_error{jj}+bank_RMS_error{jj+1}) / 2
+
+            RMS_error_list((jj+1)/2,1:60) = leaf_RMS_error{jj};
+            RMS_error_list((jj+1)/2,61:120) = leaf_RMS_error{jj+1};
+
+            variance_list((jj+1)/2,1:60) = variance{jj};
+            variance_list((jj+1)/2,61:120) = variance{jj+1};
+
+        end    
+
+    case 2%.bin files
+        %Note num_files = # of Trajectory files = # of runs, NOT the same
+        %as for .dlg files, {num_files}_bin = {num_files}_dlg/2
+        
+        
+        for ll = 1:num_files*2
+
+            leaf_error{ll} = curr_pos{ll} - planned_pos{ll};
+
+
+            if ll == 1
+                leaf_error{ll} = -leaf_error{ll};
+            end
+
+
+            leaf_RMS_error{ll} = rms(leaf_error{ll}); % in mm
+
+            mean_leaf_error{ll} = mean(leaf_error{ll}); % in mm
+
+            variance{ll} = var(leaf_error{ll});
+
+            for kk = 1:60 % 60 MLC leaves         
+
+                th_percentile{ll}(1,kk) = prctile(abs(leaf_error{ll}(:,kk)),95); % in mm
+
+            end
+
+            bank_th_percentile{ll} = prctile(abs(leaf_error{ll}(:)),95); % in mm
+
+            bank_RMS_error{ll} = mean(leaf_RMS_error{ll}); % in mm
+
+       end
+
+  
+        
+        RMS_error_list = zeros(num_files, 120);
+
+        variance_list = zeros(num_files, 120);
+
+        for jj = 1:2:num_files*2
+
+        %     RMS_error((jj+1)/2) = (bank_RMS_error{jj}+bank_RMS_error{jj+1}) / 2
+
+            RMS_error_list((jj+1)/2,1:60) = leaf_RMS_error{jj};
+            RMS_error_list((jj+1)/2,61:120) = leaf_RMS_error{jj+1};
+
+            variance_list((jj+1)/2,1:60) = variance{jj};
+            variance_list((jj+1)/2,61:120) = variance{jj+1};
+
+        end
+        
+end
 
 % put the useful data into the workspace
 handles.DIRECTORYNAME = DIRECTORYNAME;
 handles.FILE_LISTING = FILE_LISTING;
+handles.filterindex = filterindex;
 
 handles.num_files = num_files;
 handles.bank_RMS_error = bank_RMS_error;
@@ -244,6 +369,7 @@ handles2.bank_RMS_error = handles.bank_RMS_error;
 handles2.bank_th_percentile = handles.bank_th_percentile;
 handles2.RMS_error_list = handles.RMS_error_list;
 handles2.variance_list = handles.variance_list;
+handles2.filterindex = handles.filterindex
 % handles.create_bundle = create_bundle_tmp;
 % handles.output = output_tmp
 
@@ -268,7 +394,12 @@ figure
 subplot(1,2,1)
 hold all
 
-xx = 0.5:0.5:handles.num_files/2;
+switch handles.filterindex
+    case 1
+        xx = 0.5:0.5:handles.num_files/2;
+    case 2 
+        xx = 0.5:0.5:handles.num_files;
+end
 xx = round(xx);
 
 plot(xx,cell2mat(handles.bank_RMS_error) ,'r+')
@@ -294,7 +425,12 @@ function trends_Callback(hObject, eventdata, handles)
 
 % Here do a simple fitting of y=a*x+b for each leaf
 
-xx = 1:handles.num_files/2;
+switch handles.filterindex
+    case 1
+        xx = 1:handles.num_files/2;
+    case 2
+        xx = 1:handles.num_files;
+end
 
 fitresult_RMS = zeros(1, 120);
 fitresult_RMS_con = zeros(1, 120);
