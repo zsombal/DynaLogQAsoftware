@@ -19,6 +19,10 @@ Note
 - Pylinac (?) is a good software that does the same, I'd say. It also has the feature of get_moving_leaves() which is NOT implemented in this software due to time constraints (results should be about the same) 
 - The 'Trajectory' folder has the files to start with if someone wants to keep on working on the Trajectory file analysis
 
+Known issues:
+- Pylinac (?) is a good software that does the same, I'd say. It also has the feature of get_moving_leaves() which is NOT implemented in this software due to time constraints (results should be about the same) 
+- MultipleFilesQA.m sorts the files based on a modification date basis
+
 In the 'Test' folder, you can find DynaLog files to work with.
 
 Developed in an independent class project for Phys 339 (McGill University).
